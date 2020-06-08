@@ -1,4 +1,6 @@
 import Rx from 'rx';
+import { generate } from 'rxjs';
+import { mergeMap, map, toArray } from 'rxjs/operators';
 
 
 /* Graphics */
@@ -170,9 +172,31 @@ const INITIAL_OBJECTS = {
             y: 2
         }
     },
-    bricks: factory(),
+    // bricks: factory(),
+    bricks: null,
     score: 0
 };
+
+
+
+const width = (canvas.width - BRICK_GAP - BRICK_GAP * BRICK_COLUMNS) / BRICK_COLUMNS;
+const src = generate(0, i => i < BRICK_ROWS, i => i + 1).pipe(
+    mergeMap( i => generate(0, j => j < BRICK_COLUMNS, j => j + 1).pipe(map( j => ({
+        x: j * (width + BRICK_GAP) + width / 2 + BRICK_GAP,
+        y: i * (BRICK_HEIGHT + BRICK_GAP) + BRICK_HEIGHT / 2 + BRICK_GAP + 20,
+        width: width,
+        height: BRICK_HEIGHT
+    })))),
+    toArray()
+)
+
+src.subscribe({
+    next(x){
+        INITIAL_OBJECTS.bricks = x
+    }
+})
+
+console.log(INITIAL_OBJECTS);
 
 function hit(paddle, ball) {
     return ball.position.x > paddle - PADDLE_WIDTH / 2
@@ -227,26 +251,26 @@ const objects$ = ticker$
 
     }, INITIAL_OBJECTS);
 
-
+console.log('yo')
 /* Bricks */
 
-function factory() {
-    let width = (canvas.width - BRICK_GAP - BRICK_GAP * BRICK_COLUMNS) / BRICK_COLUMNS;
-    let bricks = [];
+// function factory() {
+//     let width = (canvas.width - BRICK_GAP - BRICK_GAP * BRICK_COLUMNS) / BRICK_COLUMNS;
+//     let bricks = [];
 
-    for (let i = 0; i < BRICK_ROWS; i++) {
-        for (let j = 0; j < BRICK_COLUMNS; j++) {
-            bricks.push({
-                x: j * (width + BRICK_GAP) + width / 2 + BRICK_GAP,
-                y: i * (BRICK_HEIGHT + BRICK_GAP) + BRICK_HEIGHT / 2 + BRICK_GAP + 20,
-                width: width,
-                height: BRICK_HEIGHT
-            });
-        }
-    }
+//     for (let i = 0; i < BRICK_ROWS; i++) {
+//         for (let j = 0; j < BRICK_COLUMNS; j++) {
+//             bricks.push({
+//                 x: j * (width + BRICK_GAP) + width / 2 + BRICK_GAP,
+//                 y: i * (BRICK_HEIGHT + BRICK_GAP) + BRICK_HEIGHT / 2 + BRICK_GAP + 20,
+//                 width: width,
+//                 height: BRICK_HEIGHT
+//             });
+//         }
+//     }
 
-    return bricks;
-}
+//     return bricks;
+// }
 
 function collision(brick, ball) {
     return ball.position.x + ball.direction.x > brick.x - brick.width / 2

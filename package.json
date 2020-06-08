@@ -17,5 +17,8 @@
     "browserify": "^13.0.0",
     "budo": "^8.1.0",
     "rx": "^4.1.0"
+  },
+  "dependencies": {
+    "rxjs": "^6.5.5"
   }
 }
